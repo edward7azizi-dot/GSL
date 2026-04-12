@@ -1,0 +1,54 @@
+{
+  "name": "Game",
+  "type": "object",
+  "properties": {
+    "home_team_id": {
+      "type": "string"
+    },
+    "home_team_name": {
+      "type": "string"
+    },
+    "away_team_id": {
+      "type": "string"
+    },
+    "away_team_name": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "time": {
+      "type": "string",
+      "description": "Game time e.g. 7:00 PM"
+    },
+    "location_id": {
+      "type": "string",
+      "description": "Reference to Location entity ID"
+    },
+    "location_name": {
+      "type": "string"
+    },
+    "home_score": {
+      "type": "number"
+    },
+    "away_score": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "in_progress",
+        "completed",
+        "postponed"
+      ],
+      "default": "scheduled"
+    }
+  },
+  "required": [
+    "home_team_id",
+    "away_team_id",
+    "date"
+  ]
+}

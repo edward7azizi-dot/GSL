@@ -1,0 +1,40 @@
+{
+  "name": "Media",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "photo",
+        "video"
+      ],
+      "default": "photo"
+    },
+    "url": {
+      "type": "string",
+      "description": "URL to the media file or embed"
+    },
+    "thumbnail_url": {
+      "type": "string",
+      "description": "Thumbnail image URL (for videos)"
+    },
+    "description": {
+      "type": "string"
+    },
+    "game_week": {
+      "type": "number"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "title",
+    "type",
+    "url"
+  ]
+}
