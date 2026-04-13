@@ -125,6 +125,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     await supabase.auth.signOut();
+    localStorage.removeItem('gsl-auth');
     setUser(null);
     setIsAuthenticated(false);
   };

@@ -2,6 +2,11 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Trophy, Users, MapPin, Heart } from "lucide-react";
 
+const FOUNDERS = [
+  { name: "Hirad Fazeli", title: "Founder & Commissioner" },
+  { name: "Samuel Sanglakhi", title: "Co-Founder & Director of Operations" }
+];
+
 const VALUES = [
 { icon: Trophy, title: "Competitive Spirit", desc: "We believe in fair play, healthy competition, and pushing every player to reach their peak performance." },
 { icon: Users, title: "Community First", desc: "GSL is more than a league — it's a family. We bring together players from all walks of life across the GTA." },
@@ -9,31 +14,6 @@ const VALUES = [
 { icon: Heart, title: "Passion for the Game", desc: "Every match, every goal, every moment is driven by a deep love for the beautiful game of soccer." }];
 
 
-function OwnerCard({ name, title, imagePlaceholder }) {
-  return (
-    <Card className="overflow-hidden">
-      <div className="aspect-[4/3] bg-muted flex items-center justify-center overflow-hidden">
-        {imagePlaceholder ?
-        <img src={imagePlaceholder} alt={name} className="w-full h-full object-cover" /> :
-
-        <div className="flex flex-col items-center gap-3 text-muted-foreground">
-            <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center">
-              <Users className="w-8 h-8" />
-            </div>
-            <p className="text-xs font-medium">Photo coming soon</p>
-          </div>
-        }
-      </div>
-      <CardContent className="p-5 text-center">
-        <h3 className="font-bold text-lg">{name}</h3>
-        <p className="text-sm text-primary font-medium mt-0.5">{title}</p>
-        <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-          A passionate leader in Toronto's recreational soccer community, dedicated to building a league where every player feels at home on and off the pitch.
-        </p>
-      </CardContent>
-    </Card>);
-
-}
 
 export default function AboutUs() {
   return (
@@ -92,14 +72,28 @@ export default function AboutUs() {
         </div>
       </div>
 
-      {/* Meet the Owners */}
+      {/* Meet the Founders */}
       <div>
         <h2 className="text-2xl font-bold mb-2">Meet the Founders</h2>
-        <p className="text-muted-foreground text-sm mb-4">The people behind the league.</p>
-        <div className="grid grid-cols-2 gap-4 max-w-2xl mx-auto">
-          <OwnerCard name="Owner Name 1" title="Co-Founder & Commissioner" />
-          <OwnerCard name="Owner Name 2" title="Co-Founder & Director of Operations" />
-        </div>
+        <p className="text-muted-foreground text-sm mb-6">The people behind the league.</p>
+        <Card className="overflow-hidden max-w-2xl mx-auto">
+          <div className="aspect-[16/9] overflow-hidden">
+            <img src="/images/IMG_6688.jpg" alt="Hirad Fazeli and Samuel Sanglakhi" className="w-full h-full object-cover" />
+          </div>
+          <CardContent className="p-6 text-center">
+            <div className="flex justify-center gap-10 mb-4">
+              {FOUNDERS.map((f) => (
+                <div key={f.name}>
+                  <h3 className="font-bold text-lg">{f.name}</h3>
+                  <p className="text-sm text-primary font-medium mt-0.5">{f.title}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-xl mx-auto">
+              Hirad and Samuel co-founded the GTA Super League with a shared mission to build a competitive yet welcoming soccer community across the Greater Toronto Area. Their combined passion for the beautiful game and dedication to the players is what keeps GSL growing season after season.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>);
 
