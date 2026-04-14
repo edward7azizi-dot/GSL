@@ -3,8 +3,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Trophy, Users, MapPin, Heart } from "lucide-react";
 
 const FOUNDERS = [
-  { name: "Hirad Fazeli", title: "Founder & Commissioner" },
-  { name: "Samuel Sanglakhi", title: "Co-Founder & Director of Operations" }
+  {
+    name: "Hirad Fazeli",
+    title: "Founder & Commissioner",
+    image: "/images/hirad.jpg",
+    desc: "The mastermind behind GSL, Hirad built this league from the ground up with one vision, to create a competitive soccer community that one day reaches far beyond the GTA. He oversees the league's direction and is the driving force behind its growth, with ambitions to take GSL worldwide."
+  },
+  {
+    name: "Samuel Sanglakhi",
+    title: "Co-Founder & Director of Operations",
+    image: "/images/sam.jpg",
+    desc: "Samuel joined forces with Hirad to help turn GSL into something official. From handling on-field decisions to managing the day-to-day operations behind the scenes, Sam makes sure the league runs smoothly and every player's experience is taken care of."
+  }
 ];
 
 const VALUES = [
@@ -76,24 +86,20 @@ export default function AboutUs() {
       <div>
         <h2 className="text-2xl font-bold mb-2">Meet the Founders</h2>
         <p className="text-muted-foreground text-sm mb-6">The people behind the league.</p>
-        <Card className="overflow-hidden max-w-2xl mx-auto">
-          <div className="aspect-[16/9] overflow-hidden">
-            <img src="/images/IMG_6688.jpg" alt="Hirad Fazeli and Samuel Sanglakhi" className="w-full h-full object-cover" />
-          </div>
-          <CardContent className="p-6 text-center">
-            <div className="flex justify-center gap-10 mb-4">
-              {FOUNDERS.map((f) => (
-                <div key={f.name}>
-                  <h3 className="font-bold text-lg">{f.name}</h3>
-                  <p className="text-sm text-primary font-medium mt-0.5">{f.title}</p>
-                </div>
-              ))}
-            </div>
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-xl mx-auto">
-              Hirad and Samuel co-founded the GTA Super League with a shared mission to build a competitive yet welcoming soccer community across the Greater Toronto Area. Their combined passion for the beautiful game and dedication to the players is what keeps GSL growing season after season.
-            </p>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-2 gap-4 max-w-2xl mx-auto">
+          {FOUNDERS.map((f) => (
+            <Card key={f.name} className="overflow-hidden">
+              <div className="aspect-[3/4] overflow-hidden">
+                <img src={f.image} alt={f.name} className="w-full h-full object-cover object-top" />
+              </div>
+              <CardContent className="p-4 text-center">
+                <h3 className="font-bold text-base">{f.name}</h3>
+                <p className="text-xs text-primary font-medium mt-0.5 mb-3">{f.title}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>);
 
