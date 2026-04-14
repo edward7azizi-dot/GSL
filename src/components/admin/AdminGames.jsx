@@ -17,6 +17,7 @@ import GameCompletionForm from "@/components/admin/GameCompletionForm";
 const emptyGame = {
   home_team_id: "", away_team_id: "",
   date: "", time: "",
+  week: "",
   location_id: "", location_name: "",
   home_score: 0, away_score: 0,
   status: "scheduled",
@@ -79,6 +80,7 @@ export default function AdminGames() {
       away_team_id: game.away_team_id || "",
       date: game.date || "",
       time: game.time || "7:00 PM",
+      week: game.week || "",
       location_id: game.location_id || "",
       location_name: game.location_name || "",
       home_score: game.home_score || 0,
@@ -165,7 +167,7 @@ export default function AdminGames() {
                 <TableRow key={game.id}>
                   <TableCell className="font-semibold">{game.home_team_name || getTeamName(game.home_team_id)}</TableCell>
                   <TableCell className="font-semibold">{game.away_team_name || getTeamName(game.away_team_id)}</TableCell>
-                  <TableCell className="text-sm">{game.date ? format(new Date(game.date), "MMM d") : "—"}</TableCell>
+                  <TableCell className="text-sm">{game.date ? format(new Date(game.date + 'T00:00:00'), "MMM d") : "—"}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{game.time || "—"}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{game.location_name || "—"}</TableCell>
                   <TableCell className="font-bold">{game.status === "completed" ? `${game.home_score} – ${game.away_score}` : "—"}</TableCell>
@@ -207,6 +209,7 @@ export default function AdminGames() {
               </Select>
             </div>
             <div><Label>Date</Label><Input type="date" value={form.date} onChange={e => set("date", e.target.value)} className="[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:cursor-pointer" /></div>
+            <div><Label>Week</Label><Input type="number" min={1} value={form.week} onChange={e => set("week", e.target.value ? +e.target.value : "")} placeholder="e.g. 1" /></div>
             <div className="col-span-2">
               <Label>Time</Label>
               <div className="mt-2 p-3 border rounded-lg bg-muted/30">

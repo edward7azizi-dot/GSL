@@ -5,11 +5,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Target, Shirt } from "lucide-react";
+import { Search, Target, Shirt, ChevronDown, ChevronUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function PlayerStats() {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("goals");
+  const [showAll, setShowAll] = useState(false);
 
   const { data: players = [], isLoading } = useQuery({
     queryKey: ["players"],
@@ -23,6 +25,8 @@ export default function PlayerStats() {
       return matchesSearch && matchesSort;
     })
     .sort((a, b) => (b[sortBy] || 0) - (a[sortBy] || 0));
+
+  const displayed = search || showAll ? filtered : filtered.slice(0, 10);
 
   return (
     <div className="space-y-6">
@@ -73,7 +77,7 @@ export default function PlayerStats() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((player, idx) => (
+                  {displayed.map((player, idx) => (
                     <tr key={player.id} className="border-b last:border-b-0 hover:bg-muted/30 transition-colors">
                       <td className="p-3 pl-5">
                         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary mx-auto">
@@ -105,6 +109,13 @@ export default function PlayerStats() {
                 </tbody>
               </table>
               {filtered.length === 0 && <p className="p-8 text-center text-muted-foreground">No players found.</p>}
+            </div>
+          )}
+          {!search && filtered.length > 10 && (
+            <div className="p-3 border-t flex justify-center">
+              <Button variant="ghost" size="sm" onClick={() => setShowAll(v => !v)} className="gap-2 text-muted-foreground">
+                {showAll ? (<><ChevronUp className="w-4 h-4" /> Show Less</>) : (<><ChevronDown className="w-4 h-4" /> View All ({filtered.length} players)</>)}
+              </Button>
             </div>
           )}
         </CardContent>

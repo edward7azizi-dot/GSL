@@ -83,7 +83,7 @@ export default function Schedule() {
                       {game.date && (
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
-                          {format(new Date(game.date), "EEE, MMM d, yyyy")}
+                          {format(new Date(game.date + 'T00:00:00'), "EEE, MMM d, yyyy")}
                         </span>
                       )}
                       {game.time && (

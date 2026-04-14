@@ -46,7 +46,7 @@ function HeroSlideshow() {
       <div className="relative z-10">
         <Badge className="bg-accent text-accent-foreground mb-4 font-semibold">Season 2026</Badge>
         <h1 className="text-3xl md:text-5xl font-black tracking-tight mb-2">GTA Super League</h1>
-        <p className="text-primary-foreground/80 text-lg max-w-md">Toronto's fastest-growing recreational soccer league. Game on.</p>
+        <p className="text-primary-foreground/80 text-lg max-w-md">Toronto's fastest-growing soccer league. Game on.</p>
         <div className="flex gap-3 mt-6 justify-center md:justify-start">
           <Link to="/Schedule">
             <Button variant="secondary" className="gap-2 font-semibold">
@@ -184,7 +184,7 @@ export default function Home() {
                     <p className="font-semibold text-sm">{g.home_team_name} vs {g.away_team_name}</p>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                       <Calendar className="w-3 h-3" />
-                      {g.date && format(new Date(g.date), "MMM d")}
+                      {g.date && format(new Date(g.date + 'T00:00:00'), "MMM d")}
                       {g.time && <span>· {g.time}</span>}
                       {g.location_name && <><MapPin className="w-3 h-3 ml-1" />{g.location_name}</>}
                     </div>
@@ -215,7 +215,7 @@ export default function Home() {
                       <span className="text-primary font-bold">{g.away_score}</span> {g.away_team_name}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {g.date && format(new Date(g.date), "MMM d, yyyy")}
+                      {g.date && format(new Date(g.date + 'T00:00:00'), "MMM d, yyyy")}
                     </p>
                   </div>
                   <Badge className="bg-primary/10 text-primary text-xs">Final</Badge>

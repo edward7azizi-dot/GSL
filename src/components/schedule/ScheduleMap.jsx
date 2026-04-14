@@ -76,7 +76,7 @@ export default function ScheduleMap({ games, locations = [] }) {
                       <div key={g.id} className="text-xs">
                         <p className="font-semibold">{g.home_team_name} vs {g.away_team_name}</p>
                         <p className="text-gray-500">
-                          {g.date && format(new Date(g.date), "MMM d")}
+                          {g.date && format(new Date(g.date + 'T00:00:00'), "MMM d")}
                           {g.time && ` · ${g.time}`}
                         </p>
                       </div>
