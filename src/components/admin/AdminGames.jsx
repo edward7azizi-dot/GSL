@@ -95,6 +95,7 @@ export default function AdminGames() {
     const awayTeam = teams.find(t => t.id === form.away_team_id);
     const data = {
       ...form,
+      week: form.week !== "" ? Number(form.week) : null,
       home_team_name: homeTeam?.name || "",
       away_team_name: awayTeam?.name || "",
     };
