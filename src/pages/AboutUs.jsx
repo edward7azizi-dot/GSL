@@ -1,6 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Trophy, Users, MapPin, Heart } from "lucide-react";
+
+function FounderCard({ f }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <Card className="overflow-hidden">
+      <div className="aspect-[3/4] overflow-hidden">
+        <img src={f.image} alt={f.name} className="w-full h-full object-cover object-top" />
+      </div>
+      <CardContent className="p-4 text-center">
+        <h3 className="font-bold text-base">{f.name}</h3>
+        <p className="text-xs text-primary font-medium mt-0.5 mb-3">{f.title}</p>
+        <p className={`text-xs text-muted-foreground leading-relaxed ${expanded ? "" : "line-clamp-3"}`}>{f.desc}</p>
+        <button
+          onClick={() => setExpanded(v => !v)}
+          className="text-xs text-primary font-medium mt-2 hover:underline"
+        >
+          {expanded ? "Show less" : "Read more"}
+        </button>
+      </CardContent>
+    </Card>
+  );
+}
 
 const FOUNDERS = [
   {
@@ -87,18 +109,7 @@ export default function AboutUs() {
         <h2 className="text-2xl font-bold mb-2">Meet the Founders</h2>
         <p className="text-muted-foreground text-sm mb-6">The people behind the league.</p>
         <div className="grid grid-cols-2 gap-4 max-w-2xl mx-auto">
-          {FOUNDERS.map((f) => (
-            <Card key={f.name} className="overflow-hidden">
-              <div className="aspect-[3/4] overflow-hidden">
-                <img src={f.image} alt={f.name} className="w-full h-full object-cover object-top" />
-              </div>
-              <CardContent className="p-4 text-center">
-                <h3 className="font-bold text-base">{f.name}</h3>
-                <p className="text-xs text-primary font-medium mt-0.5 mb-3">{f.title}</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
-              </CardContent>
-            </Card>
-          ))}
+          {FOUNDERS.map((f) => <FounderCard key={f.name} f={f} />)}
         </div>
       </div>
     </div>);
