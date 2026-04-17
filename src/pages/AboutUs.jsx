@@ -77,7 +77,7 @@ export default function AboutUs() {
         <h2 className="text-2xl font-bold mb-4">Our Story</h2>
         <div className="space-y-4 text-muted-foreground leading-relaxed text-center">
           <p>
-            GTA Super League was born out of a simple idea — that Toronto deserves a recreational soccer league that takes the game seriously, without losing sight of the fun. What started as a small group of friends who wanted more than a casual kickaround has evolved into a full-fledged organization with multiple teams, a professional schedule, and a growing community of passionate players.
+            GTA Super League was born out of a simple idea — that Toronto deserves a soccer league that takes the game seriously, without losing sight of the fun. What started as a small group of friends who wanted more than a casual kickaround has evolved into a full-fledged organization with multiple teams, a professional schedule, and a growing community of passionate players.
           </p>
           
 
