@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Team, Game, Player, Media } from "@/lib/entities";
@@ -9,6 +9,7 @@ import { Calendar, Trophy, Users, ArrowRight, MapPin, Play, Image as ImageIcon }
 import { format } from "date-fns";
 import { useAuth } from "@/lib/AuthContext";
 import JoinTeamCard from "@/components/JoinTeamCard";
+import { useSplashDone } from "@/App";
 
 const SLIDES = [
   "/images/hero-1.jpg",
@@ -64,7 +65,23 @@ function HeroSlideshow() {
   );
 }
 
-function StatCard({ icon: Icon, label, value, color }) {
+function useCountUp(target, ready, duration = 1200) {
+  const [count, setCount] = useState(0);
+  useLayoutEffect(() => {
+    if (!ready || !target) return;
+    const start = performance.now();
+    const tick = (now) => {
+      const progress = Math.min((now - start) / duration, 1);
+      setCount(Math.floor(progress * target));
+      if (progress < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, [target, ready, duration]);
+  return count;
+}
+
+function StatCard({ icon: Icon, label, value, color, ready }) {
+  const animated = useCountUp(typeof value === "number" ? value : 0, ready);
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-5 flex items-center gap-4">
@@ -72,7 +89,7 @@ function StatCard({ icon: Icon, label, value, color }) {
           <Icon className="w-6 h-6 text-white" />
         </div>
         <div>
-          <p className="text-2xl font-bold">{value}</p>
+          <p className="text-2xl font-bold">{typeof value === "number" ? animated : value}</p>
           <p className="text-xs text-muted-foreground font-medium">{label}</p>
         </div>
       </CardContent>
@@ -120,18 +137,21 @@ function FeaturedMedia() {
 
 export default function Home() {
   const { user } = useAuth();
-  const { data: teams = [] } = useQuery({
+  const { data: teams = [], isLoading: teamsLoading } = useQuery({
     queryKey: ["teams"],
     queryFn: () => Team.list(),
   });
-  const { data: games = [] } = useQuery({
+  const { data: games = [], isLoading: gamesLoading } = useQuery({
     queryKey: ["games"],
     queryFn: () => Game.list("-date", 50),
   });
-  const { data: players = [] } = useQuery({
+  const { data: players = [], isLoading: playersLoading } = useQuery({
     queryKey: ["players"],
     queryFn: () => Player.list(),
   });
+
+  const splashDone = useSplashDone();
+  const dataLoaded = splashDone && !teamsLoading && !gamesLoading && !playersLoading;
 
   const getEffectiveStatus = (game) => {
     if (game.status !== "scheduled" || !game.date || !game.time) return game.status;
@@ -161,10 +181,10 @@ export default function Home() {
       {user && user.role !== "admin" && <JoinTeamCard />}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard icon={Users} label="Teams" value={teams.length} color="bg-primary" />
-        <StatCard icon={Users} label="Players" value={players.length} color="bg-blue-500" />
-        <StatCard icon={Calendar} label="Games" value={games.length} color="bg-accent" />
-        <StatCard icon={Trophy} label="Completed" value={games.filter((g) => g.status === "completed").length} color="bg-purple-500" />
+        <StatCard icon={Users} label="Teams" value={teams.length} color="bg-primary" ready={dataLoaded} />
+        <StatCard icon={Users} label="Players" value={players.length} color="bg-blue-500" ready={dataLoaded} />
+        <StatCard icon={Calendar} label="Games" value={games.length} color="bg-accent" ready={dataLoaded} />
+        <StatCard icon={Trophy} label="Completed" value={games.filter((g) => g.status === "completed").length} color="bg-purple-500" ready={dataLoaded} />
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
@@ -236,6 +256,23 @@ export default function Home() {
         </div>
         <FeaturedMedia />
       </div>
+
+      {/* Partner Section */}
+      <section className="pt-8 border-t border-border text-center">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground mb-6">
+          GSL are proud partners of <span className="text-red-500">Evangelista Sports</span>
+        </p>
+        <div className="flex justify-center items-center">
+          <a href="https://www.evangelistasports.com/" target="_blank" rel="noopener noreferrer">
+            <img
+              src="/images/evangelista-logo.webp"
+              alt="Evangelista Sports"
+              className="h-28 w-28 object-contain hover:opacity-80 transition-opacity"
+              style={{ filter: "invert(1)" }}
+            />
+          </a>
+        </div>
+      </section>
     </div>
   );
 }

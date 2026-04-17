@@ -1,5 +1,8 @@
 import { Toaster } from "@/components/ui/toaster"
-import { useState } from 'react';
+import { useState, createContext, useContext } from 'react';
+
+export const SplashContext = createContext(false);
+export const useSplashDone = () => useContext(SplashContext);
 import SplashScreen from '@/components/SplashScreen';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -81,15 +84,18 @@ const AppRoutes = () => {
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
+  const [splashDone, setSplashDone] = useState(false);
 
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
+        <SplashContext.Provider value={splashDone}>
+        {showSplash && <SplashScreen onDone={() => { setShowSplash(false); setSplashDone(true); }} />}
         <Router>
           <AppRoutes />
         </Router>
         <Toaster />
+        </SplashContext.Provider>
       </QueryClientProvider>
     </AuthProvider>
   );
