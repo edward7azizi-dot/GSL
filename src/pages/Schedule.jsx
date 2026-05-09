@@ -91,26 +91,33 @@ export default function Schedule() {
                           <Clock className="w-3 h-3" />{game.time}
                         </span>
                       )}
-                      {game.location_name && (() => {
-                        const loc = locations.find(l => l.id === game.location_id);
-                        const mapsUrl = loc?.map_url ||
-                          (loc?.lat && loc?.lng ? `https://maps.google.com/?q=${loc.lat},${loc.lng}` : null) ||
-                          (loc?.address ? `https://maps.google.com/?q=${encodeURIComponent(loc.address)}` : null) ||
-                          (game.location_name ? `https://maps.google.com/?q=${encodeURIComponent(game.location_name)}` : null);
-                        return (
-                          <a
-                            href={mapsUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-primary hover:underline font-medium"
-                            title="Open in Maps"
-                          >
+                      {game.location_name && (
+                        game.location_name === "TBD" ? (
+                          <span className="flex items-center gap-1">
                             <MapPin className="w-3 h-3" />
-                            {game.location_name}
-                            {game.location_address && <span className="text-muted-foreground/60 font-normal">· {game.location_address}</span>}
-                          </a>
-                        );
-                      })()}
+                            TBD
+                          </span>
+                        ) : (() => {
+                          const loc = locations.find(l => l.id === game.location_id);
+                          const mapsUrl = loc?.map_url ||
+                            (loc?.lat && loc?.lng ? `https://maps.google.com/?q=${loc.lat},${loc.lng}` : null) ||
+                            (loc?.address ? `https://maps.google.com/?q=${encodeURIComponent(loc.address)}` : null) ||
+                            (game.location_name ? `https://maps.google.com/?q=${encodeURIComponent(game.location_name)}` : null);
+                          return (
+                            <a
+                              href={mapsUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 text-primary hover:underline font-medium"
+                              title="Open in Maps"
+                            >
+                              <MapPin className="w-3 h-3" />
+                              {game.location_name}
+                              {game.location_address && <span className="text-muted-foreground/60 font-normal">· {game.location_address}</span>}
+                            </a>
+                          );
+                        })()
+                      )}
                     </div>
                   </div>
 

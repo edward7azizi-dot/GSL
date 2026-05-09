@@ -118,6 +118,10 @@ export default function AdminGames() {
   };
 
   const handleLocationSelect = (locId) => {
+    if (locId === "tbd") {
+      setForm(prev => ({ ...prev, location_id: "tbd", location_name: "TBD" }));
+      return;
+    }
     const loc = locations.find(l => l.id === locId);
     setForm(prev => ({
       ...prev,
@@ -237,6 +241,7 @@ export default function AdminGames() {
                 <Select value={form.location_id} onValueChange={handleLocationSelect}>
                   <SelectTrigger><SelectValue placeholder="Select location" /></SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="tbd">TBD – To Be Determined</SelectItem>
                     {locations.map(l => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
