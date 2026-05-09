@@ -81,7 +81,7 @@ export default function AdminGames() {
       date: game.date || "",
       time: game.time || "7:00 PM",
       week: game.week || "",
-      location_id: game.location_id || "",
+      location_id: game.location_name === "TBD" ? "tbd" : (game.location_id || ""),
       location_name: game.location_name || "",
       home_score: game.home_score || 0,
       away_score: game.away_score || 0,
@@ -96,6 +96,7 @@ export default function AdminGames() {
     const data = {
       ...form,
       week: form.week !== "" ? Number(form.week) : null,
+      location_id: form.location_id === "tbd" ? null : form.location_id,
       home_team_name: homeTeam?.name || "",
       away_team_name: awayTeam?.name || "",
     };
