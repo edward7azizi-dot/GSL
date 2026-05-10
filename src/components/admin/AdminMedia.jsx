@@ -11,61 +11,68 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 
 function UploadDialog({ open, onClose, onSuccess }) {
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const [files, setFiles] = useState([]);
+  const [previews, setPreviews] = useState([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [gameWeek, setGameWeek] = useState("");
   const [featured, setFeatured] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState("");
   const fileRef = useRef();
 
   const handleFile = (e) => {
-    const f = e.target.files[0];
-    if (!f) return;
-    setFile(f);
-    setPreview(URL.createObjectURL(f));
-    if (!title) setTitle(f.name.replace(/\.[^/.]+$/, ""));
+    const selected = Array.from(e.target.files);
+    if (!selected.length) return;
+    setFiles(selected);
+    setPreviews(selected.map(f => URL.createObjectURL(f)));
   };
 
   const handleSubmit = async () => {
-    if (!file || !title) return;
+    if (!files.length || !title) return;
     setUploading(true);
+    let successCount = 0;
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage
-        .from('media')
-        .upload(fileName, file, { upsert: false });
-      if (uploadError) throw uploadError;
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        setUploadProgress(`Uploading ${i + 1} of ${files.length}...`);
+        const fileExt = f.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from('media')
+          .upload(fileName, f, { upsert: false });
+        if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('media')
-        .getPublicUrl(fileName);
+        const { data: { publicUrl } } = supabase.storage
+          .from('media')
+          .getPublicUrl(fileName);
 
-      const isVideo = file.type.startsWith("video/");
-      await Media.create({
-        title,
-        description,
-        type: isVideo ? "video" : "photo",
-        url: publicUrl,
-        thumbnail_url: isVideo ? "" : publicUrl,
-        game_week: gameWeek ? Number(gameWeek) : undefined,
-        featured,
-      });
-      toast.success("Media uploaded successfully!");
+        const isVideo = f.type.startsWith("video/");
+        await Media.create({
+          title,
+          description,
+          type: isVideo ? "video" : "photo",
+          url: publicUrl,
+          thumbnail_url: isVideo ? "" : publicUrl,
+          game_week: gameWeek ? Number(gameWeek) : undefined,
+          featured,
+        });
+        successCount++;
+      }
+      toast.success(`${successCount} item${successCount > 1 ? 's' : ''} uploaded successfully!`);
       onSuccess();
       handleClose();
     } catch (err) {
       toast.error(err.message || "Upload failed");
     } finally {
       setUploading(false);
+      setUploadProgress("");
     }
   };
 
   const handleClose = () => {
-    setFile(null);
-    setPreview(null);
+    setFiles([]);
+    setPreviews([]);
     setTitle("");
     setDescription("");
     setGameWeek("");
@@ -75,7 +82,7 @@ function UploadDialog({ open, onClose, onSuccess }) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Upload Media</DialogTitle>
         </DialogHeader>
@@ -86,29 +93,39 @@ function UploadDialog({ open, onClose, onSuccess }) {
             onClick={() => fileRef.current.click()}
             className="border-2 border-dashed border-border rounded-xl p-6 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
           >
-            {preview ? (
-              file?.type.startsWith("video/") ? (
-                <video src={preview} className="max-h-40 mx-auto rounded-lg" controls />
-              ) : (
-                <img src={preview} alt="preview" className="max-h-40 mx-auto rounded-lg object-contain" />
-              )
+            {previews.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">{files.length} file{files.length > 1 ? 's' : ''} selected — click to change</p>
+                <div className="grid grid-cols-4 gap-2 max-h-40 overflow-y-auto">
+                  {previews.map((src, idx) => (
+                    files[idx]?.type.startsWith("video/") ? (
+                      <div key={idx} className="aspect-square rounded-md bg-muted flex items-center justify-center">
+                        <Play className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                    ) : (
+                      <img key={idx} src={src} alt={`preview ${idx + 1}`} className="aspect-square rounded-md object-cover w-full" />
+                    )
+                  ))}
+                </div>
+              </div>
             ) : (
               <div className="flex flex-col items-center gap-2 text-muted-foreground">
                 <Upload className="w-8 h-8" />
-                <p className="text-sm font-medium">Click to upload photo or video</p>
-                <p className="text-xs">From your computer, phone, Google Drive, or Photos app</p>
+                <p className="text-sm font-medium">Click to upload photos or videos</p>
+                <p className="text-xs">Select multiple files at once — they'll all share the same label and week</p>
               </div>
             )}
             <input
               ref={fileRef}
               type="file"
               accept="image/*,video/*"
+              multiple
               className="hidden"
               onChange={handleFile}
             />
           </div>
 
-          <Input placeholder="Title *" value={title} onChange={e => setTitle(e.target.value)} />
+          <Input placeholder="Title / Label (applied to all files) *" value={title} onChange={e => setTitle(e.target.value)} />
           <Input placeholder="Description (optional)" value={description} onChange={e => setDescription(e.target.value)} />
           <Input placeholder="Game Week (optional)" type="number" value={gameWeek} onChange={e => setGameWeek(e.target.value)} />
 
@@ -120,8 +137,11 @@ function UploadDialog({ open, onClose, onSuccess }) {
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={!file || !title || uploading} className="gap-2">
-            {uploading ? <><Loader2 className="w-4 h-4 animate-spin" /> Uploading...</> : <><Upload className="w-4 h-4" /> Upload</>}
+          <Button onClick={handleSubmit} disabled={!files.length || !title || uploading} className="gap-2">
+            {uploading
+              ? <><Loader2 className="w-4 h-4 animate-spin" /> {uploadProgress}</>
+              : <><Upload className="w-4 h-4" /> Upload{files.length > 1 ? ` ${files.length} Files` : ""}</>
+            }
           </Button>
         </DialogFooter>
       </DialogContent>
