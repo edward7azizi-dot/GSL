@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Trash2, Star, StarOff, Image as ImageIcon, Play, Loader2, Plus } from "lucide-react";
+import { Upload, Trash2, Star, StarOff, Image as ImageIcon, Play, Loader2, Plus, AlertCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
@@ -19,6 +19,7 @@ function UploadDialog({ open, onClose, onSuccess }) {
   const [featured, setFeatured] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
+  const [uploadError, setUploadError] = useState("");
   const fileRef = useRef();
 
   const handleFile = (e) => {
@@ -31,6 +32,7 @@ function UploadDialog({ open, onClose, onSuccess }) {
   const handleSubmit = async () => {
     if (!files.length || !title) return;
     setUploading(true);
+    setUploadError("");
     let successCount = 0;
     try {
       for (let i = 0; i < files.length; i++) {
@@ -38,10 +40,10 @@ function UploadDialog({ open, onClose, onSuccess }) {
         setUploadProgress(`Uploading ${i + 1} of ${files.length}...`);
         const fileExt = f.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage
+        const { error: storageError } = await supabase.storage
           .from('media')
           .upload(fileName, f, { upsert: false });
-        if (uploadError) throw uploadError;
+        if (storageError) throw storageError;
 
         const { data: { publicUrl } } = supabase.storage
           .from('media')
@@ -63,7 +65,10 @@ function UploadDialog({ open, onClose, onSuccess }) {
       onSuccess();
       handleClose();
     } catch (err) {
-      toast.error(err.message || "Upload failed");
+      console.error("Media upload error:", err);
+      const msg = err?.message || err?.error_description || String(err) || "Upload failed";
+      setUploadError(msg);
+      toast.error(msg);
     } finally {
       setUploading(false);
       setUploadProgress("");
@@ -77,6 +82,7 @@ function UploadDialog({ open, onClose, onSuccess }) {
     setDescription("");
     setGameWeek("");
     setFeatured(false);
+    setUploadError("");
     onClose();
   };
 
@@ -94,8 +100,8 @@ function UploadDialog({ open, onClose, onSuccess }) {
             className="border-2 border-dashed border-border rounded-xl p-6 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
           >
             {previews.length > 0 ? (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">{files.length} file{files.length > 1 ? 's' : ''} selected — click to change</p>
+              <div className="space-y-2" onClick={e => e.stopPropagation()}>
+                <p className="text-sm font-medium text-muted-foreground">{files.length} file{files.length > 1 ? 's' : ''} selected — <span className="underline cursor-pointer" onClick={() => fileRef.current.click()}>click to change</span></p>
                 <div className="grid grid-cols-4 gap-2 max-h-40 overflow-y-auto">
                   {previews.map((src, idx) => (
                     files[idx]?.type.startsWith("video/") ? (
@@ -134,6 +140,13 @@ function UploadDialog({ open, onClose, onSuccess }) {
             Mark as Featured
           </label>
         </div>
+
+        {uploadError && (
+          <div className="flex items-start gap-2 rounded-lg bg-destructive/10 border border-destructive/30 px-3 py-2 text-sm text-destructive">
+            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+            <span>{uploadError}</span>
+          </div>
+        )}
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>Cancel</Button>
