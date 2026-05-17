@@ -75,7 +75,7 @@ export default function TeamChat() {
           {/* Main Panel */}
           <div className="flex-1 flex flex-col min-w-0">
             {/* Mobile tabs */}
-            <div className="md:hidden flex items-center gap-2 p-2 border-b shrink-0 overflow-x-auto">
+            <div className="md:hidden sticky top-0 z-20 bg-card flex items-center gap-2 p-2 border-b shrink-0 overflow-x-auto">
               {mobileTabs.map(tab => {
                 const Icon = tab.icon;
                 const isActive = selectedChat?.id === tab.id;

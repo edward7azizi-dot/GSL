@@ -24,7 +24,7 @@ export default function TeamChatPanel({ team }) {
   const sorted = [...messages].reverse();
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [sorted.length]);
 
   useEffect(() => {

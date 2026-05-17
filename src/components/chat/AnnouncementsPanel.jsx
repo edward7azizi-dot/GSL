@@ -36,7 +36,7 @@ export default function AnnouncementsPanel({ teams }) {
   const sorted = [...visible].reverse();
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [sorted.length]);
 
   useEffect(() => {
