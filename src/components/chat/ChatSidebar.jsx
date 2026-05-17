@@ -3,10 +3,22 @@ import { cn } from "@/lib/utils";
 import { Megaphone, Shield, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-export default function ChatSidebar({ teams, userTeamId, selectedChat, onSelectChat, isAdmin, isMobile, onClose }) {
-  const teamChats = isAdmin
-    ? teams.map(t => ({ type: "team", id: t.id, label: t.name, icon: Users, description: "Team chat" }))
-    : teams.filter(t => t.id === userTeamId).map(t => ({ type: "team", id: t.id, label: t.name, icon: Users, description: "Team chat" }));
+export default function ChatSidebar({ teams, userTeamId, userTeamName, selectedChat, onSelectChat, isAdmin, isMobile, onClose }) {
+  let teamChats;
+  if (isAdmin) {
+    teamChats = teams.map(t => ({ type: "team", id: t.id, label: t.name, icon: Users, description: "Team chat" }));
+  } else if (userTeamId) {
+    const match = teams.find(t => t.id === userTeamId);
+    teamChats = [{
+      type: "team",
+      id: userTeamId,
+      label: match?.name || userTeamName || "Team Chat",
+      icon: Users,
+      description: "Team chat",
+    }];
+  } else {
+    teamChats = [];
+  }
 
   const items = [
     { type: "announcements", id: "announcements", label: "League Announcements", icon: Megaphone, description: "Admin broadcasts" },

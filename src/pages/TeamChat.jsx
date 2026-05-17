@@ -20,13 +20,23 @@ export default function TeamChat() {
     queryFn: () => Team.list(),
   });
 
+  const myTeamTab = (() => {
+    if (isAdmin || !user?.team_id) return null;
+    const match = teams.find(t => t.id === user.team_id);
+    return {
+      type: "team",
+      id: user.team_id,
+      label: match?.name || user.team_name || "Team Chat",
+      icon: Users,
+      unread: unreadTeamChat,
+    };
+  })();
+
   const mobileTabs = [
     { type: "announcements", id: "announcements", label: "Announcements", icon: Megaphone, unread: unreadAnnouncements },
     ...(isAdmin
       ? teams.map(t => ({ type: "team", id: t.id, label: t.name, icon: Users, unread: 0 }))
-      : teams
-          .filter(t => t.id === user?.team_id)
-          .map(t => ({ type: "team", id: t.id, label: t.name, icon: Users, unread: unreadTeamChat }))),
+      : myTeamTab ? [myTeamTab] : []),
   ];
 
   const renderPanel = () => {
@@ -55,6 +65,7 @@ export default function TeamChat() {
             <ChatSidebar
               teams={teams}
               userTeamId={user?.team_id}
+              userTeamName={user?.team_name}
               selectedChat={selectedChat}
               onSelectChat={setSelectedChat}
               isAdmin={isAdmin}
