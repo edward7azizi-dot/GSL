@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send } from "lucide-react";
 import MessageBubble from "./MessageBubble";
+import { markChannelRead } from "@/hooks/useUnreadMessages";
 
 export default function TeamChatPanel({ team }) {
   const { user } = useAuth();
@@ -25,6 +26,10 @@ export default function TeamChatPanel({ team }) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [sorted.length]);
+
+  useEffect(() => {
+    if (user?.email && team?.id) markChannelRead(user.email, `team:${team.id}`);
+  }, [user?.email, team?.id, messages.length]);
 
   const handleSend = async () => {
     if (!text.trim()) return;

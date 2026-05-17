@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Send, Megaphone } from "lucide-react";
 import MessageBubble from "./MessageBubble";
 import TeamMultiSelect from "./TeamMultiSelect";
+import { markChannelRead } from "@/hooks/useUnreadMessages";
 
 export default function AnnouncementsPanel({ teams }) {
   const { user } = useAuth();
@@ -37,6 +38,10 @@ export default function AnnouncementsPanel({ teams }) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [sorted.length]);
+
+  useEffect(() => {
+    if (user?.email) markChannelRead(user.email, "announcements");
+  }, [user?.email, visible.length]);
 
   const handleSend = async () => {
     if (!text.trim()) return;

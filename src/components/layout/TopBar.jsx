@@ -3,10 +3,13 @@ import { Menu, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import UnreadBadge from "./UnreadBadge";
 
 export default function TopBar({ onMenuClick }) {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { total: unreadTotal } = useUnreadMessages();
 
   return (
     <header className="sticky top-0 z-30 h-14 bg-card/80 backdrop-blur-md border-b border-border flex items-center px-4 lg:px-6 gap-4">
@@ -14,6 +17,15 @@ export default function TopBar({ onMenuClick }) {
         <img src="/images/gsl-logo.jpg" alt="GSL Logo" className="w-full h-full object-cover" />
       </div>
       <div className="flex-1" />
+      {unreadTotal > 0 && (
+        <button
+          type="button"
+          onClick={onMenuClick}
+          className="lg:hidden text-xs font-semibold text-red-500 hover:text-red-400 transition-colors"
+        >
+          {unreadTotal} unread {unreadTotal === 1 ? "message" : "messages"}
+        </button>
+      )}
       <Button variant="ghost" size="icon" className="lg:hidden w-11 h-11" onClick={onMenuClick}>
         <Menu className="w-9 h-9" />
       </Button>

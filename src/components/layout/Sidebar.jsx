@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import UnreadBadge from "./UnreadBadge";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 
 const publicLinks = [
   { label: "Home", path: "/Home", icon: Home },
@@ -34,6 +36,7 @@ export default function Sidebar({ open, onClose }) {
   const role = user?.role;
   const [editOpen, setEditOpen] = useState(false);
   const [playerRecord, setPlayerRecord] = useState(null);
+  const { total: unreadTotal } = useUnreadMessages();
 
   useEffect(() => {
     if (!user || role === "admin") return;
@@ -44,6 +47,7 @@ export default function Sidebar({ open, onClose }) {
 
   const NavLink = ({ item }) => {
     const active = location.pathname === item.path;
+    const badge = item.path === "/TeamChat" ? unreadTotal : 0;
     return (
       <Link
         to={item.path}
@@ -56,7 +60,8 @@ export default function Sidebar({ open, onClose }) {
         )}
       >
         <item.icon className="w-4 h-4" />
-        {item.label}
+        <span className="flex-1">{item.label}</span>
+        <UnreadBadge count={badge} />
       </Link>
     );
   };
