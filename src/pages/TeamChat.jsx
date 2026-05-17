@@ -2,23 +2,32 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Team } from "@/lib/entities";
 import { useAuth } from "@/lib/AuthContext";
-import { MessageCircle, Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { MessageCircle, Megaphone, Users } from "lucide-react";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import TeamChatPanel from "@/components/chat/TeamChatPanel";
 import AnnouncementsPanel from "@/components/chat/AnnouncementsPanel";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { cn } from "@/lib/utils";
 
 export default function TeamChat() {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   const [selectedChat, setSelectedChat] = useState({ type: "announcements", id: "announcements", label: "League Announcements" });
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { unreadAnnouncements, unreadTeamChat } = useUnreadMessages();
 
   const { data: teams = [] } = useQuery({
     queryKey: ["teams"],
     queryFn: () => Team.list(),
   });
+
+  const mobileTabs = [
+    { type: "announcements", id: "announcements", label: "Announcements", icon: Megaphone, unread: unreadAnnouncements },
+    ...(isAdmin
+      ? teams.map(t => ({ type: "team", id: t.id, label: t.name, icon: Users, unread: 0 }))
+      : teams
+          .filter(t => t.id === user?.team_id)
+          .map(t => ({ type: "team", id: t.id, label: t.name, icon: Users, unread: unreadTeamChat }))),
+  ];
 
   const renderPanel = () => {
     if (!selectedChat) return (
@@ -52,35 +61,35 @@ export default function TeamChat() {
             />
           </div>
 
-          {/* Mobile Sidebar Overlay */}
-          {sidebarOpen && (
-            <div className="md:hidden fixed inset-0 z-50 flex">
-              <div className="w-72 bg-card border-r flex flex-col shadow-xl">
-                <div className="flex items-center justify-between p-4 border-b">
-                  <span className="font-bold">Chats</span>
-                  <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)}><X className="w-4 h-4" /></Button>
-                </div>
-                <ChatSidebar
-                  teams={teams}
-                  userTeamId={user?.team_id}
-                  selectedChat={selectedChat}
-                  onSelectChat={setSelectedChat}
-                  isAdmin={isAdmin}
-                  onClose={() => setSidebarOpen(false)}
-                />
-              </div>
-              <div className="flex-1 bg-black/40" onClick={() => setSidebarOpen(false)} />
-            </div>
-          )}
-
           {/* Main Panel */}
           <div className="flex-1 flex flex-col min-w-0">
-            {/* Mobile header */}
-            <div className="md:hidden flex items-center gap-3 p-3 border-b shrink-0">
-              <Button variant="ghost" size="icon" className="shrink-0" onClick={() => setSidebarOpen(true)}>
-                <Menu className="w-5 h-5" />
-              </Button>
-              <span className="font-semibold text-sm truncate">{selectedChat?.label || "Select a chat"}</span>
+            {/* Mobile tabs */}
+            <div className="md:hidden flex items-center gap-2 p-2 border-b shrink-0 overflow-x-auto">
+              {mobileTabs.map(tab => {
+                const Icon = tab.icon;
+                const isActive = selectedChat?.id === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setSelectedChat({ type: tab.type, id: tab.id, label: tab.label })}
+                    className={cn(
+                      "shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors relative",
+                      isActive
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted/60 text-muted-foreground hover:bg-muted"
+                    )}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span className="truncate max-w-[140px]">{tab.label}</span>
+                    {tab.unread > 0 && !isActive && (
+                      <span className="ml-1 inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-red-600 text-white text-[10px] font-bold">
+                        {tab.unread > 99 ? "99+" : tab.unread}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
             {renderPanel()}
           </div>
