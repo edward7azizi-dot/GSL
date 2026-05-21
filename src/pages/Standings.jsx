@@ -18,6 +18,30 @@ export default function Standings() {
 
   const completedGames = allGames.filter(g => g.status === "completed");
 
+  // Derive W/D/L/GF/GA/PTS per team from completed games. 3 pts win, 1 draw, 0 loss.
+  // Source of truth is the games table — keeps standings in sync when results are edited.
+  const stats = React.useMemo(() => {
+    const s = {};
+    for (const t of teams) {
+      s[t.id] = { wins: 0, draws: 0, losses: 0, goals_for: 0, goals_against: 0, points: 0 };
+    }
+    for (const g of completedGames) {
+      const home = s[g.home_team_id];
+      const away = s[g.away_team_id];
+      if (!home || !away) continue;
+      const hs = g.home_score ?? 0;
+      const as = g.away_score ?? 0;
+      home.goals_for += hs; home.goals_against += as;
+      away.goals_for += as; away.goals_against += hs;
+      if (hs > as) { home.wins++; home.points += 3; away.losses++; }
+      else if (as > hs) { away.wins++; away.points += 3; home.losses++; }
+      else { home.draws++; away.draws++; home.points++; away.points++; }
+    }
+    return s;
+  }, [teams, completedGames]);
+
+  const statsOf = (team) => stats[team.id] || { wins: 0, draws: 0, losses: 0, goals_for: 0, goals_against: 0, points: 0 };
+
   const h2hPoints = (games, teamA, teamB) => {
     let pts = 0;
     for (const g of games) {
@@ -32,16 +56,17 @@ export default function Standings() {
   };
 
   const sorted = [...teams].sort((a, b) => {
+    const sa = statsOf(a), sb = statsOf(b);
     // 1. Points
-    if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
+    if (sb.points !== sa.points) return sb.points - sa.points;
     // 2. Goal difference
-    const gdA = (a.goals_for || 0) - (a.goals_against || 0);
-    const gdB = (b.goals_for || 0) - (b.goals_against || 0);
+    const gdA = sa.goals_for - sa.goals_against;
+    const gdB = sb.goals_for - sb.goals_against;
     if (gdB !== gdA) return gdB - gdA;
     // 3. Goals for
-    if ((b.goals_for || 0) !== (a.goals_for || 0)) return (b.goals_for || 0) - (a.goals_for || 0);
+    if (sb.goals_for !== sa.goals_for) return sb.goals_for - sa.goals_for;
     // 4. Goals against (fewer = better)
-    if ((a.goals_against || 0) !== (b.goals_against || 0)) return (a.goals_against || 0) - (b.goals_against || 0);
+    if (sa.goals_against !== sb.goals_against) return sa.goals_against - sb.goals_against;
     // 5. Head-to-head
     const h2hDiff = h2hPoints(completedGames, b, a) - h2hPoints(completedGames, a, b);
     if (h2hDiff !== 0) return h2hDiff;
@@ -81,8 +106,9 @@ export default function Standings() {
                 </thead>
                 <tbody>
                   {sorted.map((team, idx) => {
-                    const gp = (team.wins || 0) + (team.draws || 0) + (team.losses || 0);
-                    const gd = (team.goals_for || 0) - (team.goals_against || 0);
+                    const ts = statsOf(team);
+                    const gp = ts.wins + ts.draws + ts.losses;
+                    const gd = ts.goals_for - ts.goals_against;
                     return (
                       <tr key={team.id} className="border-b last:border-b-0 hover:bg-muted/30 transition-colors">
                         <td className="p-3 pl-5">
@@ -92,18 +118,18 @@ export default function Standings() {
                         </td>
                         <td className="p-3 font-semibold">{team.name}</td>
                         <td className="text-center p-3 text-muted-foreground">{gp}</td>
-                        <td className="text-center p-3 font-medium text-primary">{team.wins || 0}</td>
-                        <td className="text-center p-3 text-muted-foreground">{team.draws || 0}</td>
-                        <td className="text-center p-3 text-muted-foreground">{team.losses || 0}</td>
-                        <td className="text-center p-3 text-muted-foreground">{team.goals_for || 0}</td>
-                        <td className="text-center p-3 text-muted-foreground">{team.goals_against || 0}</td>
+                        <td className="text-center p-3 font-medium text-primary">{ts.wins}</td>
+                        <td className="text-center p-3 text-muted-foreground">{ts.draws}</td>
+                        <td className="text-center p-3 text-muted-foreground">{ts.losses}</td>
+                        <td className="text-center p-3 text-muted-foreground">{ts.goals_for}</td>
+                        <td className="text-center p-3 text-muted-foreground">{ts.goals_against}</td>
                         <td className="text-center p-3">
                           <span className={gd > 0 ? "text-primary font-medium" : gd < 0 ? "text-destructive font-medium" : "text-muted-foreground"}>
                             {gd > 0 ? `+${gd}` : gd}
                           </span>
                         </td>
                         <td className="text-center p-3 pr-5">
-                          <Badge className="bg-primary/10 text-primary font-bold">{team.points || 0}</Badge>
+                          <Badge className="bg-primary/10 text-primary font-bold">{ts.points}</Badge>
                         </td>
                       </tr>
                     );

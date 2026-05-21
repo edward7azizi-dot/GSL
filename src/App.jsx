@@ -22,6 +22,7 @@ import TeamChat from '@/pages/TeamChat';
 import Admin from '@/pages/Admin';
 import TeamRoster from '@/pages/TeamRoster';
 import Login from '@/pages/Login';
+import StandingsDiagnostic from '@/pages/StandingsDiagnostic';
 
 // Redirects unauthenticated users to /Login
 function RequireAuth({ children }) {
@@ -75,6 +76,9 @@ const AppRoutes = () => {
         {/* Admin-only routes */}
         <Route path="/Admin" element={
           <RequireAuth><RequireAdmin><Admin /></RequireAdmin></RequireAuth>
+        } />
+        <Route path="/StandingsDiagnostic" element={
+          <RequireAuth><RequireAdmin><StandingsDiagnostic /></RequireAdmin></RequireAuth>
         } />
       </Route>
       <Route path="*" element={<PageNotFound />} />

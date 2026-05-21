@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Game, Player, Team } from "@/lib/entities";
+import { Game, Player } from "@/lib/entities";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -111,51 +111,9 @@ export default function GameCompletionForm({ game, onClose }) {
       })
     );
 
-    // Update team standings
-    const homeTeam = await Team.filter({ id: game.home_team_id }).then(r => r[0]);
-    const awayTeam = await Team.filter({ id: game.away_team_id }).then(r => r[0]);
-
-    if (homeTeam && awayTeam) {
-      const homeWin = homeScore > awayScore;
-      const awayWin = awayScore > homeScore;
-      const draw = homeScore === awayScore;
-
-      const homeCards = homePlayers.reduce((acc, p) => {
-        const s = playerStats[p.id] || {};
-        acc.yellow += s.yellow_cards || 0;
-        acc.red += s.red_cards || 0;
-        return acc;
-      }, { yellow: 0, red: 0 });
-
-      const awayCards = awayPlayers.reduce((acc, p) => {
-        const s = playerStats[p.id] || {};
-        acc.yellow += s.yellow_cards || 0;
-        acc.red += s.red_cards || 0;
-        return acc;
-      }, { yellow: 0, red: 0 });
-
-      await Team.update(homeTeam.id, {
-        wins: (homeTeam.wins || 0) + (homeWin ? 1 : 0),
-        losses: (homeTeam.losses || 0) + (awayWin ? 1 : 0),
-        draws: (homeTeam.draws || 0) + (draw ? 1 : 0),
-        goals_for: (homeTeam.goals_for || 0) + homeScore,
-        goals_against: (homeTeam.goals_against || 0) + awayScore,
-        points: (homeTeam.points || 0) + (homeWin ? 3 : draw ? 1 : 0),
-        yellow_cards_total: (homeTeam.yellow_cards_total || 0) + homeCards.yellow,
-        red_cards_total: (homeTeam.red_cards_total || 0) + homeCards.red,
-      });
-
-      await Team.update(awayTeam.id, {
-        wins: (awayTeam.wins || 0) + (awayWin ? 1 : 0),
-        losses: (awayTeam.losses || 0) + (homeWin ? 1 : 0),
-        draws: (awayTeam.draws || 0) + (draw ? 1 : 0),
-        goals_for: (awayTeam.goals_for || 0) + awayScore,
-        goals_against: (awayTeam.goals_against || 0) + homeScore,
-        points: (awayTeam.points || 0) + (awayWin ? 3 : draw ? 1 : 0),
-        yellow_cards_total: (awayTeam.yellow_cards_total || 0) + awayCards.yellow,
-        red_cards_total: (awayTeam.red_cards_total || 0) + awayCards.red,
-      });
-    }
+    // Standings (W/D/L/GF/GA/PTS) are derived live from the games table in Standings.jsx,
+    // so we no longer increment cached team counters here — that's what caused stats to drift
+    // when a completed game was edited. Card totals stay on the players via the loop above.
 
     queryClient.invalidateQueries({ queryKey: ["games"] });
     queryClient.invalidateQueries({ queryKey: ["players"] });
