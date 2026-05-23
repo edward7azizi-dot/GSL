@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Team } from "@/lib/entities";
 import { useAuth } from "@/lib/AuthContext";
+import { usePendingTeam } from "@/lib/PendingTeamContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,8 @@ import { Shield, MessageCircle, CheckCircle2, AlertCircle, Loader2 } from "lucid
 import { toast } from "sonner";
 
 export default function JoinTeamCard() {
-  const { user, updateMe } = useAuth();
+  const { user } = useAuth();
+  const { setPendingTeam } = usePendingTeam();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [code, setCode] = useState("");
@@ -45,10 +47,11 @@ export default function JoinTeamCard() {
         return;
       }
 
-      // Assign team to user (updateMe calls refreshUser internally)
-      await updateMe({ team_id: match.id, team_name: match.name });
-
-      // Close dialog and show success — onboarding dialog will open automatically
+      // Stage the team join in context — DO NOT commit team_id to the profile yet.
+      // AppLayout watches pendingTeam and opens the jersey-claim / onboarding flow;
+      // the profile only gets updated once the user finishes that flow. If they
+      // X-out here, pendingTeam is cleared and they look like a no-team user again.
+      setPendingTeam({ id: match.id, name: match.name });
       handleClose();
       toast.success(`Welcome to ${match.name}! Let's set up your player profile.`);
     } catch (err) {

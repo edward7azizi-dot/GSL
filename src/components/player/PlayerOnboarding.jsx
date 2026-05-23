@@ -2,9 +2,10 @@ import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import PlayerProfileForm from "@/components/player/PlayerProfileForm";
 
-export default function PlayerOnboarding({ open, onDone, needsReview = false }) {
+export default function PlayerOnboarding({ open, onClose, needsReview = false, pendingTeam = null }) {
+  // onClose receives a boolean: true = saved successfully, false = X'd out.
   return (
-    <Dialog open={open} onOpenChange={onDone}>
+    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose?.(false); }}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl font-black">Welcome to GSL! 👋</DialogTitle>
@@ -14,7 +15,12 @@ export default function PlayerOnboarding({ open, onDone, needsReview = false }) 
               : "Let's set up your player profile before you get started."}
           </p>
         </DialogHeader>
-        <PlayerProfileForm isOnboarding={true} needsReview={needsReview} onDone={onDone} />
+        <PlayerProfileForm
+          isOnboarding={true}
+          needsReview={needsReview}
+          pendingTeam={pendingTeam}
+          onDone={() => onClose?.(true)}
+        />
       </DialogContent>
     </Dialog>
   );

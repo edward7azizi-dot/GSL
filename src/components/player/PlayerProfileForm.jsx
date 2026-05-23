@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Player } from "@/lib/entities";
 import { useAuth } from "@/lib/AuthContext";
+import { usePendingTeam } from "@/lib/PendingTeamContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,8 +10,9 @@ import PositionPicker from "@/components/player/PositionPicker";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-export default function PlayerProfileForm({ player, onDone, isOnboarding = false, needsReview = false }) {
+export default function PlayerProfileForm({ player, onDone, isOnboarding = false, needsReview = false, pendingTeam = null }) {
   const { user, checkAppState, updateMe } = useAuth();
+  const { clearPendingTeam } = usePendingTeam();
   const queryClient = useQueryClient();
 
   const [form, setForm] = useState({
@@ -43,20 +45,33 @@ export default function PlayerProfileForm({ player, onDone, isOnboarding = false
         jersey_number: form.jersey_number ? Number(form.jersey_number) : null,
       };
 
+      // Target team: pendingTeam takes precedence (in-flight join), else profile.team_id.
+      const targetTeamId = pendingTeam?.id || user.team_id || null;
+      const targetTeamName = pendingTeam?.name || user.team_name || null;
+
       if (player?.id) {
         await Player.update(player.id, data);
       } else {
         await Player.create({
           ...data,
           user_email: user.email,
-          team_id: user.team_id || null,
-          team_name: user.team_name || null,
+          team_id: targetTeamId,
+          team_name: targetTeamName,
           goals: 0, assists: 0, yellow_cards: 0, red_cards: 0, games_played: 0,
           needs_review: needsReview,
         });
       }
 
-      await updateMe({ full_name });
+      // Commit pendingTeam to profile only after a successful save — and clear it.
+      // For edits (player.id set) this no-ops since pendingTeam is null on edit pages.
+      const profileUpdates = { full_name };
+      if (pendingTeam) {
+        profileUpdates.team_id = pendingTeam.id;
+        profileUpdates.team_name = pendingTeam.name;
+      }
+      await updateMe(profileUpdates);
+      if (pendingTeam) clearPendingTeam();
+
       queryClient.invalidateQueries({ queryKey: ["players"] });
       toast.success("Profile saved!");
       if (onDone) onDone();
