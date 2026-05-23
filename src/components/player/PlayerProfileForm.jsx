@@ -9,7 +9,7 @@ import PositionPicker from "@/components/player/PositionPicker";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-export default function PlayerProfileForm({ player, onDone, isOnboarding = false }) {
+export default function PlayerProfileForm({ player, onDone, isOnboarding = false, needsReview = false }) {
   const { user, checkAppState, updateMe } = useAuth();
   const queryClient = useQueryClient();
 
@@ -52,6 +52,7 @@ export default function PlayerProfileForm({ player, onDone, isOnboarding = false
           team_id: user.team_id || null,
           team_name: user.team_name || null,
           goals: 0, assists: 0, yellow_cards: 0, red_cards: 0, games_played: 0,
+          needs_review: needsReview,
         });
       }
 

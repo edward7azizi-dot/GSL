@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import AdminReviewBanner from "@/components/admin/AdminReviewBanner";
 
 export default function AdminPlayers() {
   const queryClient = useQueryClient();
@@ -63,6 +64,7 @@ export default function AdminPlayers() {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-bold">Players</h2>
+      <AdminReviewBanner players={players} />
       <Card>
         <CardContent className="p-0 overflow-x-auto">
           <Table>
