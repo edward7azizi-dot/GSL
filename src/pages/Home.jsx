@@ -9,6 +9,8 @@ import { Calendar, Trophy, Users, ArrowRight, MapPin, Play, Image as ImageIcon }
 import { format } from "date-fns";
 import { useAuth } from "@/lib/AuthContext";
 import JoinTeamCard from "@/components/JoinTeamCard";
+import PlayoffBracket from "@/components/PlayoffBracket";
+import { PLAYOFFS_MODE } from "@/config/season";
 import { useSplashDone } from "@/App";
 
 const SLIDES = [
@@ -186,6 +188,8 @@ export default function Home() {
         <StatCard icon={Calendar} label="Games" value={games.length} color="bg-accent" ready={dataLoaded} />
         <StatCard icon={Trophy} label="Completed" value={games.filter((g) => g.status === "completed").length} color="bg-purple-500" ready={dataLoaded} />
       </div>
+
+      {PLAYOFFS_MODE && <PlayoffBracket />}
 
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
