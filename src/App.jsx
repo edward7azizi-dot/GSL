@@ -4,6 +4,8 @@ import { useState, createContext, useContext } from 'react';
 export const SplashContext = createContext(false);
 export const useSplashDone = () => useContext(SplashContext);
 import SplashScreen from '@/components/SplashScreen';
+import PlayoffSplashScreen from '@/components/PlayoffSplashScreen';
+import { PLAYOFFS_MODE } from '@/config/season';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
@@ -87,16 +89,45 @@ const AppRoutes = () => {
   );
 };
 
+// During playoffs the splash is a ~3.8s bracket animation, so it plays once per
+// browser session instead of on every page load. The regular splash is short and
+// keeps its original every-load behaviour.
+const PLAYOFF_SEEN_KEY = 'gsl-playoff-splash-seen';
+
+const shouldShowSplash = () => {
+  if (!PLAYOFFS_MODE) return true;
+  try {
+    return sessionStorage.getItem(PLAYOFF_SEEN_KEY) !== '1';
+  } catch {
+    return true;
+  }
+};
+
 function App() {
-  const [showSplash, setShowSplash] = useState(true);
-  const [splashDone, setSplashDone] = useState(false);
+  const [showSplash, setShowSplash] = useState(shouldShowSplash);
+  // When the splash is skipped, downstream consumers must not wait on it.
+  const [splashDone, setSplashDone] = useState(() => !shouldShowSplash());
+
+  const finishSplash = () => {
+    setShowSplash(false);
+    setSplashDone(true);
+    if (PLAYOFFS_MODE) {
+      try {
+        sessionStorage.setItem(PLAYOFF_SEEN_KEY, '1');
+      } catch {
+        // Private mode / storage disabled — the splash just replays next load.
+      }
+    }
+  };
+
+  const Splash = PLAYOFFS_MODE ? PlayoffSplashScreen : SplashScreen;
 
   return (
     <AuthProvider>
       <PendingTeamProvider>
         <QueryClientProvider client={queryClientInstance}>
           <SplashContext.Provider value={splashDone}>
-          {showSplash && <SplashScreen onDone={() => { setShowSplash(false); setSplashDone(true); }} />}
+          {showSplash && <Splash onDone={finishSplash} />}
           <Router>
             <AppRoutes />
           </Router>
