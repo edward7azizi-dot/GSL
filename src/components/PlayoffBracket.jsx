@@ -97,24 +97,27 @@ function FinalCard({ final, finalists, compact }) {
         </div>
       </div>
       <p className="text-[10px] font-bold uppercase tracking-widest text-amber-400 mb-1.5 text-center">Final</p>
-      <div className="rounded-xl border border-amber-400/40 divide-y overflow-hidden">
-        {/* Guard on `decided` — before the final is played both sides are null,
-            and `null === null` would style two empty TBD rows as the winner.
-            No BYE badges here: both finalists had one, but not into this game. */}
-        <TeamRow
-          name={finalists[0]}
-          isWinner={decided && final.winner === finalists[0]}
-          decided={decided}
-          compact={compact}
-          score={final.homeScore}
-        />
-        <TeamRow
-          name={finalists[1]}
-          isWinner={decided && final.winner === finalists[1]}
-          decided={decided}
-          compact={compact}
-          score={final.awayScore}
-        />
+      {/* p-[2px] is the rim the spinning beam shows through. */}
+      <div className="gsl-final-frame rounded-xl p-[2px]">
+        <div className="relative rounded-[10px] bg-card divide-y overflow-hidden">
+          {/* Guard on `decided` — before the final is played both sides are null,
+              and `null === null` would style two empty TBD rows as the winner.
+              No BYE badges here: both finalists had one, but not into this game. */}
+          <TeamRow
+            name={finalists[0]}
+            isWinner={decided && final.winner === finalists[0]}
+            decided={decided}
+            compact={compact}
+            score={final.homeScore}
+          />
+          <TeamRow
+            name={finalists[1]}
+            isWinner={decided && final.winner === finalists[1]}
+            decided={decided}
+            compact={compact}
+            score={final.awayScore}
+          />
+        </div>
       </div>
       <Fixture match={final} center />
     </div>

@@ -86,3 +86,53 @@
     @apply bg-background text-foreground font-inter;
   }
 }
+
+/* Rotating gold beam around the playoff final. The beam is a conic gradient on
+   an oversized square that spins behind the card; the card's own opaque
+   background masks everything but a 2px rim. */
+@keyframes gslBeamSpin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes gslFinalGlow {
+  0%, 100% { box-shadow: 0 0 22px -6px rgba(251, 191, 36, 0.45); }
+  50%      { box-shadow: 0 0 34px -4px rgba(251, 191, 36, 0.85); }
+}
+
+.gsl-final-frame {
+  position: relative;
+  overflow: hidden;
+  /* Faint constant rim so the box stays outlined between beam sweeps. */
+  background: rgba(251, 191, 36, 0.28);
+  animation: gslFinalGlow 3s ease-in-out infinite;
+}
+
+.gsl-final-frame::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 220%;
+  aspect-ratio: 1;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 250deg,
+    rgba(251, 191, 36, 0.5) 300deg,
+    #fde68a 340deg,
+    #fbbf24 360deg
+  );
+  animation: gslBeamSpin 4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gsl-final-frame,
+  .gsl-final-frame::before {
+    animation: none;
+  }
+  /* Without the spin the gradient would freeze mid-sweep, so show a flat rim. */
+  .gsl-final-frame::before {
+    background: #fbbf24;
+  }
+}
