@@ -24,7 +24,7 @@ function Fixture({ match, center }) {
   );
 }
 
-function TeamRow({ name, isWinner, decided, compact }) {
+function TeamRow({ name, isWinner, decided, compact, score, showBye }) {
   const lost = decided && !isWinner;
   return (
     <div className={`flex items-center gap-2.5 ${compact ? "px-3 py-2" : "px-3.5 py-2.5"} ${lost ? "opacity-40" : ""}`}>
@@ -42,10 +42,15 @@ function TeamRow({ name, isWinner, decided, compact }) {
       >
         {name || "TBD"}
       </span>
-      {BYES.includes(name) && (
-        <span className="ml-auto text-[9px] font-bold tracking-wider text-muted-foreground shrink-0">BYE</span>
-      )}
-      {isWinner && <Trophy className="ml-auto w-3.5 h-3.5 text-amber-400 shrink-0" />}
+      <span className="ml-auto flex items-center gap-2 shrink-0">
+        {showBye && <span className="text-[9px] font-bold tracking-wider text-muted-foreground">BYE</span>}
+        {score != null && (
+          <span className={`${compact ? "text-sm" : "text-base"} font-bold tabular-nums ${isWinner ? "text-amber-400" : ""}`}>
+            {score}
+          </span>
+        )}
+        {isWinner && <Trophy className="w-3.5 h-3.5 text-amber-400" />}
+      </span>
     </div>
   );
 }
@@ -58,8 +63,24 @@ function Matchup({ round, match, compact }) {
         <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">{round}</p>
       )}
       <div className={`rounded-xl border divide-y overflow-hidden ${decided ? "border-amber-400/40" : "border-border"}`}>
-        <TeamRow name={match.home} isWinner={match.winner === match.home} decided={decided} compact={compact} />
-        <TeamRow name={match.away} isWinner={match.winner === match.away} decided={decided} compact={compact} />
+        {/* A bye is how a team entered this round, so drop the badge once the
+            game has been played and there's a score to show instead. */}
+        <TeamRow
+          name={match.home}
+          isWinner={match.winner === match.home}
+          decided={decided}
+          compact={compact}
+          score={match.homeScore}
+          showBye={BYES.includes(match.home) && !decided}
+        />
+        <TeamRow
+          name={match.away}
+          isWinner={match.winner === match.away}
+          decided={decided}
+          compact={compact}
+          score={match.awayScore}
+          showBye={BYES.includes(match.away) && !decided}
+        />
       </div>
       <Fixture match={match} />
     </div>
@@ -78,9 +99,22 @@ function FinalCard({ final, finalists, compact }) {
       <p className="text-[10px] font-bold uppercase tracking-widest text-amber-400 mb-1.5 text-center">Final</p>
       <div className="rounded-xl border border-amber-400/40 divide-y overflow-hidden">
         {/* Guard on `decided` — before the final is played both sides are null,
-            and `null === null` would style two empty TBD rows as the winner. */}
-        <TeamRow name={finalists[0]} isWinner={decided && final.winner === finalists[0]} decided={decided} compact={compact} />
-        <TeamRow name={finalists[1]} isWinner={decided && final.winner === finalists[1]} decided={decided} compact={compact} />
+            and `null === null` would style two empty TBD rows as the winner.
+            No BYE badges here: both finalists had one, but not into this game. */}
+        <TeamRow
+          name={finalists[0]}
+          isWinner={decided && final.winner === finalists[0]}
+          decided={decided}
+          compact={compact}
+          score={final.homeScore}
+        />
+        <TeamRow
+          name={finalists[1]}
+          isWinner={decided && final.winner === finalists[1]}
+          decided={decided}
+          compact={compact}
+          score={final.awayScore}
+        />
       </div>
       <Fixture match={final} center />
     </div>
@@ -113,15 +147,16 @@ export default function PlayoffBracket() {
         {/* Mobile-first: one column, grouped by round, most imminent round first.
             Full-width cards so "FC George Richardson" doesn't truncate. */}
         <div className="lg:hidden">
+          {/* Latest round first, so the next game to be played is at the top. */}
+          <div className="mb-7">
+            <FinalCard final={final} finalists={finalists} />
+          </div>
+
           <RoundHeading>Semifinals</RoundHeading>
           <div className="space-y-4 mb-7">
             {semifinals.map((m, i) => (
-              <Matchup key={i} match={m} />
+              <Matchup key={i} match={m} compact />
             ))}
-          </div>
-
-          <div className="mb-7">
-            <FinalCard final={final} finalists={finalists} />
           </div>
 
           <RoundHeading>Quarterfinals</RoundHeading>
