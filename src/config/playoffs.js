@@ -4,10 +4,11 @@
 // the other four played quarterfinals.
 //
 // To update after a game: set `winner` to the winning team's name, plus
-// `homeScore`/`awayScore`. Fill in `date` (YYYY-MM-DD), `time` and `venue` once
-// a fixture is scheduled — a null date renders as "TBD". The final's teams fill
-// themselves in from the semifinal winners, so there you only ever touch
-// `date`/`time`/`venue`/`winner`/scores.
+// `homeScore`/`awayScore`. If it went to a shootout, add `homePens`/`awayPens`
+// too — those render as "2 (4)" and add a penalties line. Fill in `date`
+// (YYYY-MM-DD), `time` and `venue` once a fixture is scheduled — a null date
+// renders as "TBD". The final's teams fill themselves in from the semifinal
+// winners, so there you only ever touch `date`/`time`/`venue`/`winner`/scores.
 
 export const TEAM_LOGOS = {
   "Crosby FC": "/images/teams/crosby-fc.png",
@@ -28,7 +29,17 @@ export const PLAYOFF_BRACKET = {
     { home: "Crosby FC", away: "Dieppe FC", homeScore: 4, awayScore: 3, winner: "Crosby FC", date: "2026-08-08", time: "7:00 PM", venue: "Rougecrest Park" },
     { home: "Perliona FC", away: "FC George Richardson", homeScore: 5, awayScore: 2, winner: "Perliona FC", date: "2026-08-08", time: "9:00 PM", venue: "Rougecrest Park" },
   ],
-  final: { homeScore: null, awayScore: null, winner: null, date: "2026-08-15", time: "9:00 PM", venue: "Sheppard's Bush" },
+  // Tied 2-2, Crosby through 4-3 on penalties.
+  final: {
+    homeScore: 2,
+    awayScore: 2,
+    homePens: 4,
+    awayPens: 3,
+    winner: "Crosby FC",
+    date: "2026-08-15",
+    time: "9:00 PM",
+    venue: "Sheppard's Bush",
+  },
 };
 
 // Teams that skipped the quarterfinals.

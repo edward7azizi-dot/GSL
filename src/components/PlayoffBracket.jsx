@@ -24,7 +24,7 @@ function Fixture({ match, center }) {
   );
 }
 
-function TeamRow({ name, isWinner, decided, compact, score, showBye }) {
+function TeamRow({ name, isWinner, decided, compact, score, pens, showBye }) {
   const lost = decided && !isWinner;
   return (
     <div className={`flex items-center gap-2.5 ${compact ? "px-3 py-2" : "px-3.5 py-2.5"} ${lost ? "opacity-40" : ""}`}>
@@ -47,6 +47,8 @@ function TeamRow({ name, isWinner, decided, compact, score, showBye }) {
         {score != null && (
           <span className={`${compact ? "text-sm" : "text-base"} font-bold tabular-nums ${isWinner ? "text-amber-400" : ""}`}>
             {score}
+            {/* Shootout result in parentheses, the usual football convention. */}
+            {pens != null && <span className="ml-1 text-[11px] font-semibold opacity-75">({pens})</span>}
           </span>
         )}
         {isWinner && <Trophy className="w-3.5 h-3.5 text-amber-400" />}
@@ -89,6 +91,12 @@ function Matchup({ round, match, compact }) {
 
 function FinalCard({ final, finalists, compact }) {
   const decided = Boolean(final.winner);
+  // Read the shootout off the winning side rather than assuming home won.
+  const wentToPens = final.homePens != null && final.awayPens != null;
+  const winnerIsHome = final.winner === finalists[0];
+  const pensLine = wentToPens
+    ? `${final.winner} win ${winnerIsHome ? final.homePens : final.awayPens}–${winnerIsHome ? final.awayPens : final.homePens} on penalties`
+    : null;
   return (
     <div className="w-full">
       <div className="flex justify-center mb-2">
@@ -109,6 +117,7 @@ function FinalCard({ final, finalists, compact }) {
             decided={decided}
             compact={compact}
             score={final.homeScore}
+            pens={final.homePens}
           />
           <TeamRow
             name={finalists[1]}
@@ -116,9 +125,13 @@ function FinalCard({ final, finalists, compact }) {
             decided={decided}
             compact={compact}
             score={final.awayScore}
+            pens={final.awayPens}
           />
         </div>
       </div>
+      {pensLine && (
+        <p className="text-[11px] font-semibold text-amber-400 text-center mt-2">{pensLine}</p>
+      )}
       <Fixture match={final} center />
     </div>
   );
